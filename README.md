@@ -1,1 +1,2 @@
-# Qlik-Conhecimento
+# Qlik-Conhecimento  
+Recursos uteis para desenvolvimento Qlik.
