@@ -1,0 +1,31 @@
+LIB CONNECT TO 'mercearia@PostgreSQL';
+
+LIST_OF_TABLES:
+SQL
+SELECT tablename FROM pg_catalog.pg_tables
+WHERE schemaname='public';
+
+
+FOR i=1 to FieldValueCount('tablename')
+LET vTableName = FieldValue('tablename',$(i));
+  
+ 
+$(vTableName):
+SELECT * FROM $(vTableName);
+ 
+STORE $(vTableName) INTO [lib://trash_test/$(vTableName).qvd];
+ 
+// ** this creates a table with info about the tables loaded and QVDs created
+QVDDETAILS:
+LOAD '$(vTableName).qvd' as QVD_NAME,
+       '$(vTableName)' as SOURCE_TABLENAME,
+       NoOfRows('$(vTableName)') as NO_OF_ROWS
+AutoGenerate 1;
+ 
+DROP Table $(vTableName);
+ 
+NEXT i
+
+
+exit script
+

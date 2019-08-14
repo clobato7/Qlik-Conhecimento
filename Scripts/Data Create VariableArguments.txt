@@ -1,0 +1,15 @@
+SET vCreateDate = 	Date($1)				AS [$2 Data],
+		  	Year($1)				AS [$2 Ano],
+                  	MonthName($1)				AS [$2 Mês/Ano],
+                  	Month($1)				AS [$2 Mês]
+			Day($1) 				AS [$2 Dia],
+			WeekDay($1) 				AS [$2 DiaSemana]
+			
+			Date($1,'WWWW') 			AS [$2 DiaSemanaCompleto],
+			Date($1,'M') 				AS [$2 MesN],
+			Week($1) 				AS [$2 Semana],
+			'Tri ' & ceil(month($1)/3) 		AS [$2 Trimestre],
+			ceil(month($1)/6) & '° Semestre' 	AS [$2 Semestre];
+
+--------------
+ $(vCreateDate(CampoData, AliasCampoData)), // Exemplo criando com variavel e argumento

@@ -1,0 +1,7 @@
+LET vNoTables = NoOfTables();
+
+FOR vCount = 1 to $(vNoTables)
+     	LET vTableName = TableName(0);
+     	STORE [$(vTableName)] INTO 'lib://TRANSFORMACAO/_$(vTableName).qvd' (qvd);
+ 	DROP Table [$(vTableName)];
+NEXT vCount
