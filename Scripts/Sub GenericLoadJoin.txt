@@ -1,0 +1,32 @@
+// GenericLoadTable = label da tabela que fez o generic load
+// NewTableName = nome da tabela que vai conter os dados gerados pelo generic em colunas
+
+SUB GenericLoadJoin(GenericLoadTable, NewTableName) 
+
+LET vFirstTable=1;
+
+FOR i = NoOfTables()-1 to 0 STEP -1
+
+  LET vTable=TableName($(i));
+
+  IF WildMatch('$(vTable)', '$(GenericLoadTable).*') THEN
+
+    IF vFirstTable = 1 THEN
+    	[$(NewTableName)]:
+        NoConcatenate
+        LOAD * RESIDENT [$(vTable)];
+        vFirstTable = 0;
+
+    ELSE
+    	Join LOAD * RESIDENT [$(vTable)];
+
+    ENDIF
+
+    DROP TABLE  [$(vTable)];
+
+  ENDIF
+
+NEXT i
+
+
+EndSub;

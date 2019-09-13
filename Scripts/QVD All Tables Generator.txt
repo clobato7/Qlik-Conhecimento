@@ -1,5 +1,5 @@
 FOR vCount = 0 to NoOfTables()-1
      LET vTableName = TableName($(vCount));
-     STORE $(vTableName) INTO 'lib://teste/$(vTableName).qvd' (qvd);
+     STORE [$(vTableName)] INTO 'lib://teste/$(vTableName).qvd' (qvd);
 	
 NEXT vCount
