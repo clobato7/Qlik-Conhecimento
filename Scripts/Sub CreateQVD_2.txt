@@ -5,4 +5,5 @@ SUB CreateQVD(vTable,vDir);
   Trace ==== Generating QVD file of "$(Table)" into "$(vDir)"... Done! ====;
 EndSub;
 
+
 CALL CreateQVD('Your Table Name without [ ]');
