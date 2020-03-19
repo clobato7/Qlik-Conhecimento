@@ -1,8 +1,8 @@
 SUB CreateQVD(vTable,vDir);
-  STORE [$(Table)] INTO [$(vDir)/$(vTable).qvd] (qvd);
-  DROP TABLE [$(Table)];
+  STORE [$(vTable)] INTO [$(vDir)/$(vTable).qvd] (qvd);
+  DROP TABLE [$(vTable)];
   
-  Trace ==== Generating QVD file of "$(Table)" into "$(vDir)"... Done! ====;
+  Trace ==== Generating QVD file of "$(vTable)" into "$(vDir)"... Done! ====;
 EndSub;
 
 
