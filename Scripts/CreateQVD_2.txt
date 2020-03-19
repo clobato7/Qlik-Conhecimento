@@ -1,0 +1,8 @@
+SUB CreateQVD(vTable,vDir);
+  STORE [$(Table)] INTO [$(vDir)/$(vTable).qvd] (qvd);
+  DROP TABLE [$(Table)];
+  
+  Trace ==== Generating QVD file of "$(Table)" into "$(vDir)"... Done! ====;
+EndSub;
+
+CALL CreateQVD('Your Table Name without [ ]');
