@@ -1,0 +1,8 @@
+SUB CreateQVD(Table,FileName);
+  STORE [$(Table)] INTO [lib://HereIsYourLib/$(FileName).qvd] (qvd);
+  DROP TABLE [$(Table)];
+  
+  Trace ==== Generating QVD file of "$(Table)" as $(FileName).qvd ... Done! ====;
+EndSub;
+
+CALL CreateQVD('Your Table Name without [ ]','Your QVD File name');
