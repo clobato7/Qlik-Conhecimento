@@ -1,0 +1,18 @@
+// SETAR NESSA VARIAVEL EM QUAL AMBIENTE SERÁ TESTADO/PUBLICADO A APLICAÇÃO, VER OPÇÕES NO SWITCH ABAIXO (Homologação, Desenvolvimento, etc)
+Set vAmbienteCarga = 'Desenvolvimento';
+
+Switch '$(vAmbienteCarga)' //ComputerName() --- tambem pode utilizar a função computername() caso saiba o nome dos ambientes
+	Case 'Desenvolvimento'
+		Set vLibPath = 'lib://Financeiro - QVD/';
+	
+    Case 'Homologação'
+    	Set vLibPath = 'lib://DFIN Homologa';
+    
+	Case 'Produção'
+		Set vLibPath = 'lib://Dados Gerais/DFIN\Painel Financeiro\QVD\QVD_T';
+	
+    Default
+    	TRACE Erro! Setar uma variavel vAmbienteCarga válida.;
+        Set vLibPath = '';
+        
+End Switch;
