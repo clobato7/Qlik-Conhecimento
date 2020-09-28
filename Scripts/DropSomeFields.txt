@@ -1,0 +1,18 @@
+
+Let fieldsDrop = ;
+for idCampo = 1 to NoOfFields('novatabela')
+
+    Let tempCampo = FieldName($(idCampo),'novatabela');
+
+    If WildMatch(tempCampo,'type_*','null') then
+	    Let fieldsDrop = '$(fieldsDrop)' & ',' & '$(tempCampo)';
+        //Trace IDENTIFICOU --> $(tempCampo);
+    EndIf;
+    
+next idCampo
+
+Let fieldsDrop = Right('$(fieldsDrop)', len('$(fieldsDrop)')-1) & ';';
+
+TRACE Fields to drop --> $(fieldsDrop);
+
+Drop Fields $(fieldsDrop);
