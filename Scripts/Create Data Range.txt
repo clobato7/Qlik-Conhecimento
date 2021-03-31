@@ -1,8 +1,8 @@
 DataRange_Tabela:
 LOAD
-Date(AddMonths(DataInicio,IterNo()-1)) as DataRange // pega cada mês desde DataInicio
-WHILE Date(AddMonths(DataInicio,IterNo()-1)) <= DataFim;// até o ultimo mês = DataFim
+Date(AddMonths(DataInicio,IterNo()-1)) as DataRange       // Cria registro para cada mês desde DataInicio..
+WHILE Date(AddMonths(DataInicio,IterNo()-1)) <= DataFim;  // ...até o ultimo mês = DataFim
 Load
-Date(AddYears(YearStart('$(vToday)'),-1)) as DataInicio, // DataInicio = Inicio do ano anterior
-Date('$(vToday)') as DataFim
+Date(AddYears(YearStart('$(vToday)'),-1)) as DataInicio,  // DataInicio = Inicio do ano anterior
+Date('$(vToday)') as DataFim                              // DataFim = Hoje // Variavel 'vToday' = today()
 Autogenerate 1;
