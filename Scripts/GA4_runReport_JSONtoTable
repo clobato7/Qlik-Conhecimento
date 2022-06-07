@@ -1,0 +1,148 @@
+SUB GA4_runReport_JSONtoTable(subResultTable,subBody)
+
+    LIB CONNECT TO 'Google Analytics 4 (srv-cicc-qlik02_prqlik)';
+
+	TRACE ## Google Analytics - $(subResultTable) ##;
+
+    RestConnectorMasterTable:
+    SQL SELECT 
+        "__KEY_root",
+        (SELECT 
+            "name",
+            "__FK_dimensionHeaders"
+        FROM "dimensionHeaders" FK "__FK_dimensionHeaders"),
+        (SELECT 
+            "name" AS "name_u0",
+            "type",
+            "__FK_metricHeaders"
+        FROM "metricHeaders" FK "__FK_metricHeaders"),
+        (SELECT 
+            "__KEY_rows",
+            "__FK_rows",
+            (SELECT 
+                "value",
+                "__FK_dimensionValues"
+            FROM "dimensionValues" FK "__FK_dimensionValues"),
+            (SELECT 
+                "value" AS "value_u0",
+                "__FK_metricValues"
+            FROM "metricValues" FK "__FK_metricValues")
+        FROM "rows" PK "__KEY_rows" FK "__FK_rows")
+    FROM JSON (wrap on) "root" PK "__KEY_root"
+    WITH CONNECTION (
+        BODY "$(subBody)",
+        HTTPHEADER "Authorization" "Bearer $(vToken)" // pegando o token atualizado/valido adquirido na requisição refresh token
+    )
+    ;
+
+    [dimensionHeaders]:
+    LOAD
+        RowNo()					as idColunaDimensão, // só para debug
+        [name]					as NomeDimensão
+    // 	[__FK_dimensionHeaders] AS [__KEY_root]
+    RESIDENT RestConnectorMasterTable
+    WHERE NOT IsNull([__FK_dimensionHeaders]);
+
+    // Contando quantas dimensões tem na requisição
+    LET vQtdDimensões = NoOfRows('dimensionHeaders');
+
+
+    [metricHeaders]:
+    LOAD
+        RowNo()					as idColunaMedida, // só para debug
+        [name_u0] 				as NomeMedida,//[name_u0],
+        [type]					as TipoMedida
+    // 	[__FK_metricHeaders] AS [__KEY_root]
+    RESIDENT RestConnectorMasterTable
+    WHERE NOT IsNull([__FK_metricHeaders]);
+
+    // Contando quantas dimensões tem na requisição
+    LET vQtdMedidas = NoOfRows('metricHeaders');
+
+    // puxando isso se precisar contar quantas linhas tem para condição (se rowCount = 100000, aplica logica de paginação com "startAt"/"from"/ou algo do tipo)
+    // [rows]:
+    // LOAD	[__KEY_rows],
+    // 	[__FK_rows] AS [__KEY_root]
+    // RESIDENT RestConnectorMasterTable
+    // WHERE NOT IsNull([__FK_rows]);
+
+    // Contando quantas linhas tem na requisição
+    // LET vQtdMedidas = NoOfRows('rows');
+
+    // valores das dimensões por linha do resultado
+    [dimensionValues]:
+    LOAD
+        if([__FK_dimensionValues]=peek([__KEY_rows]),peek(ColunaDimensão)+1,1) as ColunaDimensão, // isso aqui diz de qual coluna o valor pertence
+    // 	Mod(RowNo(),$(vQtdDimensões)) as teste_coluna,
+        [value],
+        [__FK_dimensionValues] AS [__KEY_rows]
+    RESIDENT RestConnectorMasterTable
+    WHERE NOT IsNull([__FK_dimensionValues]);
+
+    // valores das medidas por linha do resultado
+    [metricValues]:
+    LOAD
+        if([__FK_metricValues]=peek([__KEY_rows]),peek(ColunaMedida)+1,1) as ColunaMedida, // isso aqui diz de qual coluna o valor pertence
+    // 	Mod(RowNo(),$(vQtdMedidas)) as teste_coluna1,
+        [value_u0] AS [value_u0],
+        [__FK_metricValues] AS [__KEY_rows]
+    RESIDENT RestConnectorMasterTable
+    WHERE NOT IsNull([__FK_metricValues]);
+
+
+    DROP TABLE RestConnectorMasterTable;
+
+
+
+    // dumb table - apenas para iniciar tabela Dados
+    [$(subResultTable)]:
+    Load * Inline [
+    __KEY_rows
+    ];
+
+    // Iniciando variavel... Ela representa no laço for a Coluna que está sendo apurada, dando join de acordo com linha resultado
+    Let vColuna = '';
+
+    For i = 1 to $(vQtdDimensões) step 1
+
+        vColuna = FieldValue('NomeDimensão', $(i)); 
+
+        Join ([$(subResultTable)])
+        Load
+            [__KEY_rows],
+            [value]			as Dimensão_$(vColuna)
+        Resident dimensionValues
+        Where ColunaDimensão = $(i) 
+        ;
+
+    Next
+
+    Drop Table dimensionValues, dimensionHeaders;
+
+    For i = 1 to $(vQtdMedidas) step 1
+
+        vColuna = FieldValue('NomeMedida', $(i)); 
+
+        Join ([$(subResultTable)])
+        Load
+            [__KEY_rows],
+            [value_u0]			as Medida_$(vColuna)
+        Resident metricValues
+        Where ColunaMedida = $(i) 
+        ;
+
+    Next
+
+    Drop Table metricValues, metricHeaders;
+	Drop Field [__KEY_rows] from [$(subResultTable)];
+End Sub;
+
+// -------------------------- Chamando a SubRotina, Precisa criar o vBody pra chamar a Sub
+LET vBody = '{"dimensions":[{"name":"cityId"},{"name":"date"},{"name":"deviceCategory"},{"name":"firstUserDefaultChannelGrouping"}],"metrics":[{"name":"activeUsers"},{"name":"newUsers"},{"name":"totalUsers"},{"name":"userEngagementDuration"}],"dateRanges":[{"startDate":"2022-05-08","endDate":"today"}],"orderBys":[{"dimension":{"orderType":"NUMERIC","dimensionName":"date"},"desc":false}]}';
+
+// formatando body
+LET vBody = replace(vBody,'"', chr(34) & chr(34));
+
+Call GA4_runReport_JSONtoTable('ResultQuery1','$(vBody)');
+
+Call CreateQVD('ResultQuery1','$(vLibFolder)/QVD_E/Google Analytics');
