@@ -6,4 +6,4 @@ SUB CreateQVD(vTable,vDir);
 EndSub;
 
 
-CALL CreateQVD('Your Table Name without [ ]');
+CALL CreateQVD('lib://YourLibName/PathIfNeeded','Your Table Name without [ ]');
