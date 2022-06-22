@@ -1,30 +1,29 @@
 SUB CriaCalendario(CampoData, NomeCalendario)
 
-[$(NomeCalendario)]:
-LOAD
-[$(CampoData)],
-Year([$(CampoData)]) as Ano,
-Month([$(CampoData)]) as Mes,
-Date(MonthStart([$(CampoData)]), 'MMM/YYYY')as MesAno,
-Day([$(CampoData)]) as Dia,
-WeekDay([$(CampoData)]) as DiaSemana,//;
-Date([$(CampoData)],'WWWW') as DiaSemanaCompleto,
-Date([$(CampoData)],'M') as MesN,
-//---------------mudanças a partir daqui...
-Week([$(CampoData)]) AS Semana,
-'Tri ' & ceil(month([$(CampoData)])/3) AS Trimestre,
-ceil(month([$(CampoData)])/6) & '° Semestre' AS Semestre;
-//Week([$(CampoData)])&'-'&Year([$(CampoData)]) AS SemanaAno; 
-//---------------...até aqui
-LOAD
-Date(MenorData + IterNo()) as [$(CampoData)]
-WHILE MenorData + IterNo() <= MaiorData;
-LOAD
-Min(Data)-1 as MenorData,
-Max(Data) as MaiorData;
-LOAD 
-FieldValue('$(CampoData)', RecNo()) as Data
-AutoGenerate FieldValueCount('$(CampoData)');
+    [$(NomeCalendario)]:
+    LOAD
+    	[$(CampoData)],
+    	Year([$(CampoData)]) as Ano,
+    	Month([$(CampoData)]) as Mes,
+    	Date(MonthStart([$(CampoData)]), 'MMM/YYYY')as MesAno,
+//     	Day([$(CampoData)]) as Dia,
+//     	WeekDay([$(CampoData)]) as DiaSemana,//;
+//     	Date([$(CampoData)],'WWWW') as DiaSemanaCompleto,
+//     	Date([$(CampoData)],'M') as MesN,
+//     	Week([$(CampoData)]) AS Semana,
+    	'Tri ' & ceil(month([$(CampoData)])/3) AS Trimestre,
+    	ceil(month([$(CampoData)])/6) & 'Â° Semestre' AS Semestre
+	Where Exists([$(CampoData)])
+    ;
+    LOAD
+    	Date(MenorData + IterNo()) as [$(CampoData)]
+    	WHILE MenorData + IterNo() <= MaiorData;
+    LOAD
+    	Min(Data)-1 as MenorData,
+    	Max(Data) 	as MaiorData;
+    LOAD 
+    	FieldValue('$(CampoData)', RecNo()) as Data
+    AutoGenerate FieldValueCount('$(CampoData)');
 
 END SUB;
 
