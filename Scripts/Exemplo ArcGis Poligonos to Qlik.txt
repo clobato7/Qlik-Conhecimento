@@ -1,0 +1,153 @@
+//https://portalgeo.chesf.com.br/server/rest/services/Subestacao/FeatureServer/1/query?where=1%3D1&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=&havingClause=&gdbVersion=&historicMoment=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=xyFootprint&resultOffset=&resultRecordCount=&returnTrueCurves=false&returnExceededLimitFeatures=false&quantizationParameters=&returnCentroid=false&timeReferenceUnknownClient=false&sqlFormat=none&resultType=&featureEncoding=esriDefault&datumTransformation=&f=geojson
+/* -------- Mapa de Polígonos -------- */
+LIB CONNECT TO 'Mapa Instalações Polígonos (redechesf_intel023)';
+
+RestConnectorMasterTable:
+SQL SELECT 
+	"__KEY_root",
+	(SELECT 
+		"type" AS "type_u0",
+		"id",
+		"__KEY_features",
+		"__FK_features",
+		(SELECT 
+			"type",
+			"__KEY_geometry",
+			"__FK_geometry",
+			(SELECT 
+				"__KEY_coordinates",
+				"__FK_coordinates",
+				(SELECT 
+					"__KEY_coordinates_u0",
+					"__FK_coordinates_u0",
+					(SELECT 
+						"@Value",
+						"__FK_coordinates_u1"
+					FROM "coordinates" FK "__FK_coordinates_u1" ArrayValueAlias "@Value")
+				FROM "coordinates" PK "__KEY_coordinates_u0" FK "__FK_coordinates_u0")
+			FROM "coordinates" PK "__KEY_coordinates" FK "__FK_coordinates")
+		FROM "geometry" PK "__KEY_geometry" FK "__FK_geometry"),
+		(SELECT 
+			"OBJECTID",
+			"NOME_SE",
+			"SIGLA",
+			"url",
+			"url1",
+			"Shape__Area",
+			"Shape__Length",
+			"Area_m_1",
+			"__FK_properties"
+		FROM "properties" FK "__FK_properties")
+	FROM "features" PK "__KEY_features" FK "__FK_features")
+FROM JSON (wrap on) "root" PK "__KEY_root";
+
+
+
+/* Juntando informações sobre cada poligono (informações 1 x 1) */
+Polígonos:
+// [features]: // tirei essa tabela pois não é necessaria
+// LOAD	//[type_u0] AS [type_u0],
+// 	[id] as [OBJECTID],
+// 	[__KEY_features]
+// 	//[__FK_features] AS [__KEY_root]
+// RESIDENT RestConnectorMasterTable
+// WHERE NOT IsNull([__FK_features]);
+
+// // [properties]:
+// Left Join (Polígonos)
+LOAD	
+// 	[OBJECTID],
+// 	[NOME_SE],
+	[SIGLA] as [SIGLA_SE],
+// 	[url],
+// 	[url1],
+// 	[Shape__Area],
+// 	[Shape__Length],
+// 	[Area_m_1],
+	[__FK_properties] AS [__KEY_features]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_properties]);
+
+
+// [geometry]:
+Left Join (Polígonos)
+LOAD	
+// 	[type],
+	[__KEY_geometry],
+	[__FK_geometry] AS [__KEY_features]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_geometry]);
+
+
+
+
+/* Pegando as informações das coordenadas de cada poligono/geometry (informações 1 x N) */
+[CoordenadasTemp]:
+// [coordinates_u1]:
+LOAD	
+	[__KEY_coordinates],
+	[__FK_coordinates] AS [__KEY_geometry]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_coordinates]);
+
+// [coordinates_u0]:
+Left Join (CoordenadasTemp)
+LOAD	
+	[__KEY_coordinates_u0],
+	[__FK_coordinates_u0] AS [__KEY_coordinates]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_coordinates_u0]);
+
+
+// [coordinates]:
+Left Join (CoordenadasTemp)
+LOAD	[@Value],
+	[__FK_coordinates_u1] AS [__KEY_coordinates_u0]
+RESIDENT RestConnectorMasterTable
+WHERE NOT IsNull([__FK_coordinates_u1]);
+
+
+DROP TABLE RestConnectorMasterTable;
+
+
+
+
+/* Juntando as informações de lat long de cada vertice do poligono */
+CoordenadasTemp2:
+Load
+	[__KEY_geometry],
+	[__KEY_coordinates],
+    [__KEY_coordinates_u0],
+	'[' & Concat([@Value], ',', RecNo()) & ']' as Vertice
+Resident CoordenadasTemp
+Group By [__KEY_coordinates_u0],[__KEY_coordinates], [__KEY_geometry]
+;
+
+Drop Table CoordenadasTemp;
+
+
+
+
+/* Juntando as informações lat long dos vertices do poligono em uma linha só de acordo com padrão formatado 
+ex: [[[[-36.90954009629837,-5.591969503289874],[-36.908586966015605,-5.5919457665838195],[-36.90717068577851,-5.592234455255834],[-36.90716796892656,-5.5923609943643555],[-36.90554331756999,-5.592618608761711],[-36.90551540531169,-5.593809881320908],[-36.90951302040952,-5.5938447300501934],[-36.90954009629837,-5.591969503289874]]]]
+*/
+// Coordenadas:
+Left Join (Polígonos)
+Load
+	[__KEY_geometry],
+	'[[[' & Concat(Vertice, ',', RecNo()) & ']]]'  as [InstalacoesChesfArea_Geometry]/*ConjuntoVertice*/
+Resident CoordenadasTemp2
+Group By [__KEY_geometry]
+;
+
+// taggeando o campo como um geopolygon (peguei isso do geoanalytics)
+tag field [InstalacoesChesfArea_Geometry]/*ConjuntoVertice*/ with '$geopolygon';
+
+Drop Table CoordenadasTemp2;
+
+
+// concatenando o mapa de poligonos com o de ponto, conforme era quando puxava tudo via geoAnalytics
+Concatenate (MapaInstalações) 
+Load */*, 'Area' as Fonte*/ Resident Polígonos;
+
+Drop Table Polígonos;
