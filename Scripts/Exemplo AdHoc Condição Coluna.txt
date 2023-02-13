@@ -1,4 +1,11 @@
+
+Condições de Coluna:
 SubStringCount('|' & Concat([Dimensões],'|') & '|','|Produto|')
-
-
 SubStringCount('|' & Concat([Medidas],'|') & '|','|Venda Total|')
+
+
+Condições de Objeto (complementos):
+GetSelectedCount([Medidas]) > 0 and GetSelectedCount(Dimensões) > 0
+
+Mensagem condição:
+='Para visualizar o relatório dinâmico escolha ao menos uma dimensão (segregação dos valores) e uma medida (valores calculados) acima.'
