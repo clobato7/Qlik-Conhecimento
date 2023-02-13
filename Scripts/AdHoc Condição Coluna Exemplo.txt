@@ -1,0 +1,4 @@
+SubStringCount('|' & Concat([Dimensões],'|') & '|','|Produto|')
+
+
+SubStringCount('|' & Concat([Medidas],'|') & '|','|Venda Total|')
