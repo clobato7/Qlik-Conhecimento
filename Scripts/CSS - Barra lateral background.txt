@@ -1,0 +1,7 @@
+.qvt-sheet {
+  background-image: linear-gradient(
+    90deg,
+    #70ba6e 11.4%,
+    #ffffff 1%
+  ) !important;
+}

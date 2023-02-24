@@ -1,0 +1,83 @@
+﻿///$tab Main
+SET ThousandSep='.';
+SET DecimalSep=',';
+SET MoneyThousandSep='.';
+SET MoneyDecimalSep=',';
+SET MoneyFormat='R$ #.##0,00;-R$ #.##0,00';
+SET TimeFormat='hh:mm:ss';
+SET DateFormat='DD/MM/YYYY';
+SET TimestampFormat='DD/MM/YYYY hh:mm:ss[.fff]';
+SET MonthNames='jan;fev;mar;abr;mai;jun;jul;ago;set;out;nov;dez';
+SET DayNames='dom;seg;ter;qua;qui;sex;sáb';
+
+// Todas as cores
+LET vCorDoFundo = rgb(255,255,255);
+LET vCorDaAba = rgb(065,118,048);
+LET vCorDoFundoDaAba = rgb(169,220,147);
+LET vCorDoTextoDaAba = rgb(255,255,255);
+LET vBotoesDeRolagemFundo = rgb(255,255,255);
+LET vBotoesDeRolagemTexto = rgb(065,118,048);
+LET vTituloAtivoFundo = rgb(065,118,048);
+LET vTituloAtivoTexto = rgb(255,255,255);
+LET vTituloInativoFundo = rgb(169,220,147);
+LET vTituloInativoTexto = rgb(065,118,048);
+LET vUsaBordaCor = rgb(161,216,139);
+LET vCorTexto = rgb(000,000,000);
+
+///$tab SQL Server
+//*** ATENÇÃO, DEPENDENDO DO TAMANHO DA SUA BASE DE DADOS, ISSO PODE DEMORAR ***//
+
+// String de conexão de exemplo usando o MySQL hospedado na Locaweb com tabelas de exercícios
+ODBC CONNECT TO [SQL Server];
+
+Tabelas: // Carrega todos objetos tabelas ou views
+LOAD If(not IsNull(TABLE_CATALOG),TABLE_CATALOG&'.',TABLE_CATALOG) as TABLE_CATALOG,
+	If(not IsNull(TABLE_SCHEMA),TABLE_SCHEMA&'.',TABLE_SCHEMA) as TABLE_SCHEMA,
+	TABLE_NAME,
+	TABLE_TYPE;
+SQL select TABLE_CATALOG,
+	TABLE_SCHEMA,
+	TABLE_NAME,
+	TABLE_TYPE
+from INFORMATION_SCHEMA.TABLES
+where TABLE_TYPE <> 'SYSTEM VIEW';
+
+Let vLinhas = NoOfRows('Tabelas'); // Define o número de objetos que serão exportados
+
+FOR x = 0 to ($(vLinhas)-1) // O -1 é necessário pois o indice começa em zero
+
+	Let vCatalogo = Peek('TABLE_CATALOG',$(x)); // Define o nome da base de dados no objeto atual
+	Let vModelo = Peek('TABLE_SCHEMA',$(x)); // Define o nome do modelo no objeto atual
+	Let vTabela = Peek('TABLE_NAME',$(x)); // Define o nome do objeto a ser exportado
+	
+	$(vTabela):
+	SQL SELECT * FROM $(vCatalogo)$(vModelo)$(vTabela);
+	
+	STORE $(vTabela) into $(vCatalogo)$(vModelo)$(vTabela).qvd (qvd);
+	
+	DROP Table $(vTabela);
+
+NEXT;
+
+DROP Table Tabelas;
+///$tab Informações para Analises
+TABELAS:
+SQL select * from INFORMATION_SCHEMA.TABLES;
+
+VIEWS:
+SQL select * from INFORMATION_SCHEMA.VIEWS;
+
+COLUMNS:
+//Left Join (Tabelas)
+SQL select * from INFORMATION_SCHEMA.COLUMNS;
+
+CONSTRAINTS:
+//Left Join (Tabelas)
+SQL select * from INFORMATION_SCHEMA.TABLE_CONSTRAINTS;
+
+QUALIFY *; UNQUALIFY TABLE_CATALOG;
+
+ROUTINES:
+SQL select *, SPECIFIC_NAME as TABLE_CATALOG from INFORMATION_SCHEMA.ROUTINES;
+
+DISCONNECT;
