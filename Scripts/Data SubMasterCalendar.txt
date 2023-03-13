@@ -8,12 +8,12 @@ SUB CriaCalendario(CampoData, NomeCalendario)
     	Date(MonthStart([$(CampoData)]), 'MMM/YYYY')as MesAno,
 //     	Day([$(CampoData)]) as Dia,
 //     	WeekDay([$(CampoData)]) as DiaSemana,//;
-//     	Date([$(CampoData)],'WWWW') as DiaSemanaCompleto,
+//     	Dual(Text(Date([$(CampoData)],'WWWW')),WeekDay([$(CampoData)])) as DiaSemanaCompleto,
 //     	Date([$(CampoData)],'M') as MesN,
 //     	Week([$(CampoData)]) AS Semana,
     	'Tri ' & ceil(month([$(CampoData)])/3) AS Trimestre,
     	ceil(month([$(CampoData)])/6) & '° Semestre' AS Semestre
-	Where Exists([$(CampoData)])
+	Where Exists([$(CampoData)]) // Comentar aqui caso precise do intervalo completo de datas e não apenas os valores de $(CampoData) que existe
     ;
     LOAD
     	Date(MenorData + IterNo()) as [$(CampoData)]
