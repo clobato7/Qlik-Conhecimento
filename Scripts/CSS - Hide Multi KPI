@@ -9,3 +9,9 @@
 Some CSS code...
 ................
 */
+
+/* 
+!!!!!!!!
+Important note: to apply the CSS code on a sheet with Multi KPI object you have to add at least on measure (can be anything valid), otherwise CSS code will not apply 
+!!!!!!!!
+*/
