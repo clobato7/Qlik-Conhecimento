@@ -1,0 +1,11 @@
+/* Useful when you want to "inject" some CSS on a sheet with Multi KPI extension object, but do not want to show Multi KPI object */
+
+.qv-object-qlik-multi-kpi {
+    display: none;
+}
+
+/*
+................
+Some CSS code...
+................
+*/
