@@ -1,0 +1,41 @@
+Set vDiretorio = lib://YourLibHere/PathIfNeeded
+
+// ** a list of all the tables you want to load from the source **
+LIST_OF_TABLES:
+LOAD * INLINE [
+TABLENAME
+Task
+TaskName
+TaskTrigger
+ReloadSummary
+LogContent
+] ;
+
+
+// From This line, the script is static
+// Generate a Loop for each value in the LIST_OF_TABLES table
+ 
+FOR i=1 to FieldValueCount('TABLENAME')
+    LET vTableName = FieldValue('TABLENAME',$(i));
+
+    _$(vTableName):
+    NoConcatenate
+    Load * Resident $(vTableName);
+
+    STORE _$(vTableName) INTO [$(vDiretorio)/$(vTableName).qvd];
+	    
+    // ** this creates a table with info about the tables loaded and QVDs created
+    QVDDETAILS:
+    LOAD '$(vTableName).qvd' as QVD_NAME,
+           '$(vTableName)' as SOURCE_TABLENAME,
+           NoOfRows('_$(vTableName)') as NO_OF_ROWS
+    AutoGenerate 1;
+ 
+ 	DROP TABLE _$(vTableName);
+    
+NEXT i
+
+If NoOfRows('QVDDETAILS') > 0 then
+	STORE QVDDETAILS INTO [$(vDiretorio)/QVDDETAILS.qvd];
+End If
+
