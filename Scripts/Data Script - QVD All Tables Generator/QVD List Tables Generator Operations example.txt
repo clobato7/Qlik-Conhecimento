@@ -1,4 +1,4 @@
-Set vDiretorio = lib://YourLibHere/PathIfNeeded
+Set vDiretorio = lib://YourLibHere/PathIfNeeded;
 
 // ** a list of all the tables you want to load from the source **
 LIST_OF_TABLES:
