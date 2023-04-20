@@ -18,11 +18,11 @@ LogContent
 FOR i=1 to FieldValueCount('TABLENAME')
     LET vTableName = FieldValue('TABLENAME',$(i));
 
-    _$(vTableName):
+    [_$(vTableName)]:
     NoConcatenate
-    Load * Resident $(vTableName);
+    Load * Resident [$(vTableName)];
 
-    STORE _$(vTableName) INTO [$(vDiretorio)/$(vTableName).qvd];
+    STORE [_$(vTableName)] INTO [$(vDiretorio)/$(vTableName).qvd];
 	    
     // ** this creates a table with info about the tables loaded and QVDs created
     QVDDETAILS:
@@ -31,7 +31,7 @@ FOR i=1 to FieldValueCount('TABLENAME')
            NoOfRows('_$(vTableName)') as NO_OF_ROWS
     AutoGenerate 1;
  
- 	DROP TABLE _$(vTableName);
+ 	DROP TABLE [_$(vTableName)];
     
 NEXT i
 
