@@ -64,4 +64,4 @@ End Sub
 //Call VarQVD_Insert('debug_dateToday',Today());
 //Call VarQVD_Store('variablesTeste');
 //Call VarQVD_Load('variablesTeste.qvd');
-
+//Call VarQVD_Insert('vBaseLinePeriod',000015);
