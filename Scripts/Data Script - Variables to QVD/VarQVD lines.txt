@@ -1,3 +1,5 @@
+// ToDo: Isso pode ir para um txt/qvs e chamar via include
+
 Let vDocumentName = DocumentName();
 
 // Carrega variaveis guardadas em QVD
