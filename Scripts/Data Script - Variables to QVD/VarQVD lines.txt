@@ -48,6 +48,8 @@ Sub VarQVD_Store(pOutputQVD)
 			
 	If NoOfRows('tVariables') > 0 then
 		Store tVariables into $(pOutputQVD).qvd (qvd);
+		Drop Table tVariables;
+		
 	Else // se nao existir a tabela retorna nulo e cai aqui 
 		// Nothing
 		Trace # VarToQVD - ATENÇÃO - Não há variaveis para Store #;
@@ -57,7 +59,7 @@ End Sub
 
 
 // TESTES
-//Call VarQVD_Insert('debug_string','TESTE - TESTE + TESTE');
+//Call VarQVD_Insert('debug_string','HMR - Health Market Research');
 //Call VarQVD_Insert('debug_soma',2+2);
 //Call VarQVD_Insert('debug_dateText','01/01/2024');
 //Call VarQVD_Insert('debug_Number',1000);
