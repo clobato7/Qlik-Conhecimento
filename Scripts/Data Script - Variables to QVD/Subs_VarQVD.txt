@@ -42,7 +42,8 @@ Sub VarQVD_Insert(pName,pValue)
 	// Concatena as novas variaveis a tabela tVariables
 	Concatenate (tVariables)
 	Load '$(pName)' as varName, '$(pValue)' as varValue, '$(vDocumentName)' as varDocumentName AutoGenerate 1;
-
+	// Let $(pName) = '$(pValue)'; // ToDo: Verificar se eh interessante criar variavel aqui tambem para utilizar no app caso seja preciso
+	 
 End Sub
 
 // Salva a tabela de variaveis em um QVD
