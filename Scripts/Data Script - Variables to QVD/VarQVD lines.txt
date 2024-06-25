@@ -1,5 +1,6 @@
 Let vDocumentName = DocumentName();
 
+// Carrega variaveis guardadas em QVD
 Sub VarQVD_Load(pPath)
 	
 	tVariablesLoad:
@@ -23,6 +24,7 @@ Sub VarQVD_Load(pPath)
 	
 End Sub
 
+// Insere variaveis (nome e valor) em QVD
 Sub VarQVD_Insert(pName,pValue)
 	
 	// Inicializa a tabela de variaveis (tVariables) se nao houver registros ainda
@@ -41,6 +43,7 @@ Sub VarQVD_Insert(pName,pValue)
 
 End Sub
 
+// Salva a tabela de variaveis em um QVD
 Sub VarQVD_Store(pOutputQVD)
 			
 	If NoOfRows('tVariables') > 0 then
@@ -54,7 +57,7 @@ End Sub
 
 
 // TESTES
-//Call VarQVD_Insert('debug_string','HMR - Health Market Research');
+//Call VarQVD_Insert('debug_string','TESTE - TESTE + TESTE');
 //Call VarQVD_Insert('debug_soma',2+2);
 //Call VarQVD_Insert('debug_dateText','01/01/2024');
 //Call VarQVD_Insert('debug_Number',1000);
@@ -62,6 +65,3 @@ End Sub
 //Call VarQVD_Store('variablesTeste');
 //Call VarQVD_Load('variablesTeste.qvd');
 
-
-
-exit script;
