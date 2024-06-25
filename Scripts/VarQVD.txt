@@ -1,0 +1,67 @@
+Let vDocumentName = DocumentName();
+
+Sub VarQVD_Load(pPath)
+	
+	tVariablesLoad:
+	NoConcatenate
+	Load varName, varValue, varDocumentName, '' as DropMe from [$(pPath)] (qvd);
+
+	Trace ## Variaveis Carregadas ##;
+
+	FOR i = 0 to NoOfRows('tVariablesLoad')-1 // O -1 é necessário pois o indice começa em zero
+	
+		Let vName 	= Peek('varName',$(i),'tVariablesLoad'); 
+		Let vValue 	= Peek('varValue',$(i),'tVariablesLoad'); 
+		
+		Let $(vName) = '$(vValue)'; // salva o valor da variavel como texto
+		
+		Trace # $(vName) = $(vValue) #;
+				
+	NEXT;
+	
+	Drop Table tVariablesLoad;
+	
+End Sub
+
+Sub VarQVD_Insert(pName,pValue)
+	
+	// Inicializa a tabela de variaveis (tVariables) se nao houver registros ainda
+	If NoOfRows('tVariables') > 0 then
+		// Nothing
+	Else // se nao existir a tabela retorna nulo e cai aqui  
+		tVariables:
+		Load * Inline [
+		varName, varValue, varDocumentName
+		]; 
+	End If
+	
+	// Concatena as novas variaveis a tabela tVariables
+	Concatenate (tVariables)
+	Load '$(pName)' as varName, '$(pValue)' as varValue, '$(vDocumentName)' as varDocumentName AutoGenerate 1;
+
+End Sub
+
+Sub VarQVD_Store(pOutputQVD)
+			
+	If NoOfRows('tVariables') > 0 then
+		Store tVariables into $(pOutputQVD).qvd (qvd);
+	Else // se nao existir a tabela retorna nulo e cai aqui 
+		// Nothing
+		Trace # VarToQVD - ATENÇÃO - Não há variaveis para Store #;
+	End If
+	 
+End Sub
+
+
+// TESTES
+//Call VarQVD_Insert('debug_string','HMR - Health Market Research');
+//Call VarQVD_Insert('debug_soma',2+2);
+//Call VarQVD_Insert('debug_dateText','01/01/2024');
+//Call VarQVD_Insert('debug_Number',1000);
+//Call VarQVD_Insert('debug_dateToday',Today());
+//Call VarQVD_Store('variablesTeste');
+//Call VarQVD_Load('variablesTeste.qvd');
+
+
+
+exit script;
