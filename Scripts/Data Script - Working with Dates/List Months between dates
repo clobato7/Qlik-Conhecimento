@@ -2,9 +2,18 @@
 // Obs: forcing to use MonthStart
 Months:
 LOAD
-	AddMonths(BeginMonth, IterNo() -1) as [Month]
+	AddMonths(BeginMonth, IterNo() -1) as [Month] // You can format date to your needs here like. Ex: Date(xxx,'MMMMYYYY')
 While AddMonths(BeginMonth, IterNo() -1) <= EndMonth;
 LOAD
 	MonthStart(Date('01/01/2024')) 	as BeginMonth, 	// need to use MonthStart
 	MonthStart(Today()) 			      as EndMonth 	// need to use MonthStart
 AutoGenerate 1;
+
+// Just a trace to check the result
+// Hint: I used this loop to read many excel sheets with month names (needed to format with 'MMMMYYYY'). Obs: ODBC connection was not possible :) maybe it was going to be easier
+For i=0 to NoOfRows('Months') - 1
+
+	Let vMonth = Peek('Month',$(i));
+    	Trace $(vMonth);
+
+Next
