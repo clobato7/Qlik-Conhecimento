@@ -1,0 +1,10 @@
+// List of Months between BeginMonth and EndMonth
+// Obs: forcing to use MonthStart
+Months:
+LOAD
+	AddMonths(BeginMonth, IterNo() -1) as [Month]
+While AddMonths(BeginMonth, IterNo() -1) <= EndMonth;
+LOAD
+	MonthStart(Date('01/01/2024')) 	as BeginMonth, 	// need to use MonthStart
+	MonthStart(Today()) 			      as EndMonth 	// need to use MonthStart
+AutoGenerate 1;
