@@ -1,0 +1,54 @@
+// === Sub to get Conversion Currency ===
+// API: https://docs.awesomeapi.com.br/api-de-moedas#codigos-das-moedas
+// === Manual parameters ===
+// pFrom 		-> Convert currency from (eg: EUR, USD, BRL...) https://economia.awesomeapi.com.br/xml/available
+// pTo 			-> Convert currency to (eg: EUR, USD, BRL...) https://economia.awesomeapi.com.br/xml/available
+// pStartDate 	-> Start date to capture (format: YYYYMMDD -> 20240805)
+// pEndDate 	-> End date to capture (format: YYYYMMDD -> 20240805)
+// pValue 		-> Wich value? 'bid', 'ask', 'low', 'high'
+
+Sub GetConversion(pFrom, pTo, pStartDate, pEndDate, pValue)
+
+    // Create any Rest Connection because URL is defined here in URL parameter (With Connection). Important: must be allowed to use With Connection! 
+    LIB CONNECT TO 'Economia API';
+
+    RestConnectorMasterTable:
+    SQL SELECT 
+        "code",
+        "codein",
+        "name",
+        "high",
+        "low",
+        "varBid",
+        "pctChange",
+        "bid",
+        "ask",
+        "timestamp",
+        "create_date"
+    FROM JSON (wrap on) "root"
+    WITH CONNECTION (
+        URL "https://economia.awesomeapi.com.br/json/daily/$(pFrom)-$(pTo)/",
+        QUERY "start_date" "$(pStartDate)",
+        QUERY "end_date" "$(pEndDate)"
+    )
+    ;
+
+    [root]:
+    LOAD	
+    // 	[code],
+    // 	[codein],
+    // 	[name],
+    // 	[high],
+    // 	[low],
+    // 	[varBid],
+    // 	[pctChange],   
+    //  [bid], // Compra
+    // 	[ask], // Venda
+    [$(pValue)] as value,
+    // 	[timestamp],
+        Date(Floor([create_date])) as [create_date]
+    RESIDENT RestConnectorMasterTable;
+
+    DROP TABLE RestConnectorMasterTable;
+
+End Sub
