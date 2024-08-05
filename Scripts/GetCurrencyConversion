@@ -5,7 +5,7 @@
 // pTo 			-> Convert currency to (eg: EUR, USD, BRL...) https://economia.awesomeapi.com.br/xml/available
 // pStartDate 	-> Start date to capture (format: YYYYMMDD -> 20240805)
 // pEndDate 	-> End date to capture (format: YYYYMMDD -> 20240805)
-// pValue 		-> Wich value? 'bid', 'ask', 'low', 'high'
+// pValue 		-> Wich value/Field? (discontinued)
 
 Sub GetConversion(pFrom, pTo, pStartDate, pEndDate, pValue)
 
