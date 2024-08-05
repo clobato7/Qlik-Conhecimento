@@ -33,19 +33,19 @@ Sub GetConversion(pFrom, pTo, pStartDate, pEndDate, pValue)
     )
     ;
 
-    [root]:
+    [GetConversion_Table]:
     LOAD	
-    // 	[code],
-    // 	[codein],
-    // 	[name],
-    // 	[high],
-    // 	[low],
-    // 	[varBid],
-    // 	[pctChange],   
-    //  [bid], // Compra
-    // 	[ask], // Venda
-    [$(pValue)] as value,
-    // 	[timestamp],
+    	[code],
+    	[codein],
+    	[name],
+    	[high],
+    	[low],
+    	[varBid],
+    	[pctChange],   
+     	[bid], // Compra
+    	[ask], // Venda
+//     [$(pValue)] as value,
+    	[timestamp],
         Date(Floor([create_date])) as [create_date]
     RESIDENT RestConnectorMasterTable;
 
