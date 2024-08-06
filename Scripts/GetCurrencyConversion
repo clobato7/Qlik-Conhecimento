@@ -3,15 +3,28 @@
 // === Manual parameters ===
 // pFrom 		-> Convert currency from (eg: EUR, USD, BRL...) https://economia.awesomeapi.com.br/xml/available
 // pTo 			-> Convert currency to (eg: EUR, USD, BRL...) https://economia.awesomeapi.com.br/xml/available
+// pMethod		-> last or daily?
 // pStartDate 	-> Start date to capture (format: YYYYMMDD -> 20240805)
 // pEndDate 	-> End date to capture (format: YYYYMMDD -> 20240805)
 // pValue 		-> Wich value/Field? (discontinued)
 
-Sub GetConversion(pFrom, pTo, pStartDate, pEndDate, pValue)
+Sub GetConversion(pFrom, pTo, pMethod, pStartDate, pEndDate)
 
     // Create any Rest Connection because URL is defined here in URL parameter (With Connection). Important: must be allowed to use With Connection! 
     LIB CONNECT TO 'Economia API';
 
+	// Url and From changes between methods last/daily
+	Switch '$(pMethod)'
+    	Case 'last'
+        	Let vUrl = 'https://economia.awesomeapi.com.br/json/last/$(pFrom)-$(pTo)';           
+            Let vFrom = '(wrap off) "$(pFrom)$(pTo)"';
+        
+        Case 'daily'
+        	Let vUrl = 'https://economia.awesomeapi.com.br/json/daily/$(pFrom)-$(pTo)/?start_date=$(pStartDate)&end_date=$(pEndDate)';
+            Let vFrom = '(wrap on) "root"';
+    
+    End Switch
+    
     RestConnectorMasterTable:
     SQL SELECT 
         "code",
@@ -25,11 +38,9 @@ Sub GetConversion(pFrom, pTo, pStartDate, pEndDate, pValue)
         "ask",
         "timestamp",
         "create_date"
-    FROM JSON (wrap on) "root"
+    FROM JSON $(vFrom)
     WITH CONNECTION (
-        URL "https://economia.awesomeapi.com.br/json/daily/$(pFrom)-$(pTo)/",
-        QUERY "start_date" "$(pStartDate)",
-        QUERY "end_date" "$(pEndDate)"
+        URL "$(vUrl)"
     )
     ;
 
@@ -44,11 +55,18 @@ Sub GetConversion(pFrom, pTo, pStartDate, pEndDate, pValue)
     	[pctChange],   
      	[bid], // Compra
     	[ask], // Venda
-//     [$(pValue)] as value,
     	[timestamp],
-        Date(Floor([create_date])) as [create_date]
+        Date(Floor([create_date])) as [create_date],
+        
+        '$(pMethod)' as param_method
     RESIDENT RestConnectorMasterTable;
 
     DROP TABLE RestConnectorMasterTable;
 
 End Sub
+
+
+
+// Call GetConversion(pFrom, pTo, pMethod, pStartDate, pEndDate)
+// Call GetConversion('EUR', 'BRL', 'last');
+// Call GetConversion('EUR', 'BRL', 'daily',Date(Today()-2,'YYYYMMDD'),Date(Today()-2,'YYYYMMDD'));
