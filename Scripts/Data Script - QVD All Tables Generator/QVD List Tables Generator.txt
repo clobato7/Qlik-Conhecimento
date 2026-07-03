@@ -12,10 +12,10 @@ SCHEMA.TABLE2
 FOR i=1 to FieldValueCount('TABLENAME')
 LET vTableName = FieldValue('TABLENAME',$(i));
  
-$(vTableName):
-SELECT * FROM $(vTableName);
+[$(vTableName)]:
+SELECT * FROM [$(vTableName)];
  
-STORE $(vTableName) INTO [lib://<dataconnection>/$(vTableName).qvd];
+STORE [$(vTableName)] INTO [lib://<dataconnection>/$(vTableName).qvd];
  
 // ** this creates a table with info about the tables loaded and QVDs created
 QVDDETAILS:
