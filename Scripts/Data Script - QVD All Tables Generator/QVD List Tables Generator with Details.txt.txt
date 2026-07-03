@@ -1,0 +1,78 @@
+// CHANGE YOUR LIB CONNECTION HERE
+LIB CONNECT 'MY_CONNECTION';
+
+// Define um novo Id ao Script
+Let vScriptRunId = If(IsNull('$(vScriptRunId)'),1,$(vScriptRunId)+1);
+//Let vScriptRunId2 = Hash160(now(1));
+
+Trace vScriptRunId  => '$(vScriptRunId)';
+//Trace vScriptRunId2 => '$(vScriptRunId2)';
+
+
+// ** a list of all the tables you want to load from the source **
+LIST_OF_TABLES:
+LOAD * INLINE [
+TABLENAME
+DIMMARKET
+DIMPERIOD
+DIMPRODUCT
+DIMREGION
+DIMTEAM
+FACTDAILY
+FACTMONTHLY
+] ;
+
+
+// Dummy Table, later used
+QVDDETAILS:
+LOAD * INLINE [SOURCE_TABLENAME];
+
+// From This line, the script is static
+// Generate a Loop for each value in the LIST_OF_TABLES table
+ 
+FOR i=1 to FieldValueCount('TABLENAME')
+	LET vTableName = FieldValue('TABLENAME',$(i));
+	LET vTableStartTime = ;
+	LET vTableEndTime = ;
+	 
+	LET vTableStartTime = Now(1); // Time Load SQL Starts
+	 
+	[$(vTableName)]:
+	SQL 
+	SELECT  
+		* 
+	FROM "MY_SCHEMA"."$(vTableName)" // change source schema here
+	;
+	
+	LET vTableEndTime = Now(1); // Time Load SQL Ends
+		 
+	STORE [$(vTableName)] INTO [./$(vTableName).qvd] (qvd);
+	 
+	// ** this creates a table with info about the tables loaded and QVDs created
+	Concatenate (QVDDETAILS)
+	LOAD
+		'$(vScriptRunId)'					as SCRIPT_RUN_ID,
+		'$(vTableName)' 					as SOURCE_TABLENAME,
+		Timestamp('$(vTableStartTime)') 	as SOURCE_STARTTIME,
+		Timestamp('$(vTableEndTime)') 		as SOURCE_ENDTIME,
+		Interval(Timestamp('$(vTableEndTime)') - Timestamp('$(vTableStartTime)'),'h:mm:ss') 
+											as SOURCE_INTERVALTIME,
+		'$(vTableName).qvd' 				as QVD_NAME,
+	    NoOfRows('$(vTableName)') 			as NO_OF_ROWS
+	AutoGenerate 1;
+	 
+	DROP Table [$(vTableName)];
+ 
+NEXT i
+
+
+// Condição para verificar se existe o arquivo historico de validação, caso seja apagado para resetar o historico ou qualquer outro motivo não tera problema...
+If FileSize('./QVDDETAILS.qvd') > 0 then
+	Concatenate (QVDDETAILS)
+	Load
+		*
+	From [./QVDDETAILS.qvd] (qvd);
+End If;
+
+// Salva carga atual e historico no Qvd
+Store QVDDETAILS into [./QVDDETAILS.qvd] (qvd);
